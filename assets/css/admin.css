@@ -1,0 +1,273 @@
+/* ============================================================
+   AUTO BLOGGER AI — ADMIN STYLES
+   Author: Auto Blogger AI Plugin
+   Description: Styles for admin pages, modals, forms, metaboxes,
+                 and the campaign type selector popup.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   General Admin UI Enhancements
+------------------------------------------------------------ */
+
+.aba-admin-wrap {
+    padding: 20px;
+}
+
+.aba-section-title {
+    font-size: 20px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.aba-description {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.aba-box {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 6px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+}
+
+.aba-flex {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.aba-flex-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.aba-badge {
+    background: #2271b1;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+
+
+/* ------------------------------------------------------------
+   Form Fields
+------------------------------------------------------------ */
+
+.aba-field-group {
+    margin-bottom: 18px;
+}
+
+.aba-field-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.aba-field-group input[type="text"],
+.aba-field-group input[type="number"],
+.aba-field-group textarea,
+.aba-field-group select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+
+.aba-field-inline {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.aba-checkbox {
+    margin-top: 4px;
+}
+
+
+/* ------------------------------------------------------------
+   Buttons
+------------------------------------------------------------ */
+
+.aba-btn {
+    display: inline-block;
+    padding: 8px 14px;
+    background: #2271b1;
+    border-radius: 4px;
+    color: #fff !important;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+}
+
+.aba-btn:hover {
+    background: #135e96;
+}
+
+.aba-btn-secondary {
+    background: #6c7781;
+}
+
+.aba-btn-secondary:hover {
+    background: #4a5258;
+}
+
+
+
+/* ------------------------------------------------------------
+   Modal — Campaign Type Selector
+------------------------------------------------------------ */
+
+#aba-campaign-type-modal {
+    display: none; /* JS Shows It */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(18, 18, 18, 0.65);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+}
+
+#aba-campaign-type-modal .aba-modal-inner {
+    background: #fff;
+    width: 460px;
+    padding: 25px;
+    border-radius: 10px;
+    animation: fadeIn 0.25s ease-out;
+}
+
+#aba-campaign-type-modal h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.aba-campaign-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.aba-campaign-option {
+    background: #f7f7f7;
+    border: 1px solid #dadada;
+    padding: 15px;
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.aba-campaign-option:hover {
+    background: #e3f0ff;
+    border-color: #2271b1;
+}
+
+.aba-campaign-option i {
+    font-size: 26px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+
+
+/* ------------------------------------------------------------
+   Loader (used for scraping + AI processing)
+------------------------------------------------------------ */
+
+.aba-loader {
+    border: 4px solid #e2e2e2;
+    border-radius: 50%;
+    border-top: 4px solid #2271b1;
+    width: 34px;
+    height: 34px;
+    animation: aba-spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes aba-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+
+/* ------------------------------------------------------------
+   Metabox Styling
+------------------------------------------------------------ */
+
+.aba-metabox table.form-table th {
+    width: 200px;
+    padding: 12px 10px;
+}
+
+.aba-metabox table.form-table td {
+    padding: 12px 10px;
+}
+
+
+
+/* ------------------------------------------------------------
+   Logs Page
+------------------------------------------------------------ */
+
+.aba-log-entry {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-left: 4px solid #2271b1;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    font-family: monospace;
+    white-space: pre-line;
+}
+
+.aba-log-entry.error {
+    border-left-color: #d63638;
+}
+
+.aba-log-entry.success {
+    border-left-color: #46b450;
+}
+
+
+/* ------------------------------------------------------------
+   Animation
+------------------------------------------------------------ */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
+
+/* ------------------------------------------------------------
+   Utility Classes
+------------------------------------------------------------ */
+
+.mt-10 { margin-top: 10px; }
+.mt-20 { margin-top: 20px; }
+.mb-10 { margin-bottom: 10px; }
+.mb-20 { margin-bottom: 20px; }
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.aba-hidden {
+    display: none !important;
+}
