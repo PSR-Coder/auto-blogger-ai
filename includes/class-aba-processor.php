@@ -414,61 +414,53 @@ class ABA_Processor {
 			return new WP_Error( 'no_image', 'No image URL provided' );
 		}
 
-		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 
-		// Use media_sideload_image to save to library; it returns HTML on success or WP_Error
-		$tmp = media_sideload_image( esc_url_raw( $image_url ), 0, null );
+		// Download file to temp
+		$tmp = download_url( $image_url );
 
-		// media_sideload_image returns <img> HTML string if successful. We need to find the attachment id.
 		if ( is_wp_error( $tmp ) ) {
 			return $tmp;
 		}
 
-		// Try to find the attachment by source URL
-		$attachments = get_posts( array(
-			'post_type' => 'attachment',
-			'numberposts' => 1,
-			'orderby' => 'post_date',
-			'order' => 'DESC',
-			'meta_query' => array(
-				array(
-					'key' => '_wp_attachment_metadata',
-					'value' => '',
-					'compare' => '!=',
-				),
-			),
-		) );
+		$file_array = array();
+		$file_array['tmp_name'] = $tmp;
+		// Determine filename
+		$path_parts = pathinfo( parse_url( $image_url, PHP_URL_PATH ) );
+		$filename = isset( $path_parts['basename'] ) ? $path_parts['basename'] : wp_basename( $image_url );
+		$file_array['name'] = sanitize_file_name( $filename );
 
-		// Best-effort: attempt to match by URL (heavy but practical)
-		$uploads = wp_upload_dir();
-		$basename = wp_basename( $image_url );
-		$found = null;
+		// Sideload
+		$sideload = wp_handle_sideload( $file_array, array( 'test_form' => false ) );
 
-		$args = array(
-			'post_type'      => 'attachment',
+		if ( isset( $sideload['error'] ) ) {
+			@unlink( $tmp );
+			return new WP_Error( 'sideload_error', $sideload['error'] );
+		}
+
+		$file_path = $sideload['file'];
+
+		$filetype = wp_check_filetype( $file_path, null );
+		$attachment = array(
+			'post_mime_type' => $filetype['type'] ? $filetype['type'] : 'image/jpeg',
+			'post_title'     => sanitize_file_name( pathinfo( $file_path, PATHINFO_FILENAME ) ),
+			'post_content'   => '',
 			'post_status'    => 'inherit',
-			'posts_per_page' => 5,
-			'orderby'        => 'date',
 		);
-		$recent = get_posts( $args );
-		foreach ( $recent as $att ) {
-			$att_url = wp_get_attachment_url( $att->ID );
-			if ( ! $att_url ) {
-				continue;
-			}
-			if ( false !== stripos( $att_url, $basename ) ) {
-				$found = $att->ID;
-				break;
-			}
+
+		$attach_id = wp_insert_attachment( $attachment, $file_path );
+		if ( is_wp_error( $attach_id ) ) {
+			// Clean temp file if insertion failed
+			@unlink( $file_path );
+			return $attach_id;
 		}
 
-		if ( $found ) {
-			return $found;
-		}
+		// Generate metadata and update
+		$metadata = wp_generate_attachment_metadata( $attach_id, $file_path );
+		wp_update_attachment_metadata( $attach_id, $metadata );
 
-		// If not found, return a WP_Error to allow caller to ignore featured image
-		return new WP_Error( 'not_found', 'Attachment not found' );
+		return $attach_id;
 	}
 }

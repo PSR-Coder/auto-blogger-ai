@@ -241,30 +241,61 @@ final class ABA_Plugin {
 	 *
 	 * @param string $hook Current admin page hook.
 	 */
-	public function admin_assets( $hook ) {
-		// Only enqueue when needed in admin.
-		wp_enqueue_style( 'aba-admin-css', ABA_PLUGIN_URL . 'assets/css/admin.css', array(), self::VERSION );
+  public function admin_assets( $hook ) {
+    // Only load on admin screens where it's required
+    $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+    $allowed_screen_ids = array(
+      'edit-ai_campaign',           // campaigns list
+      'ai_campaign',                // single edit for our CPT
+      'post-new.php',               // new post screen (we check post_type)
+      'toplevel_page_aba_root',     // plugin dashboard page
+    );
 
-		wp_enqueue_script( 'aba-admin-campaign', ABA_PLUGIN_URL . 'assets/js/admin-campaign.js', array( 'jquery' ), self::VERSION, true );
+    $enqueue = false;
 
-		// Localize script - pass WP nonce and post_type param
-		wp_localize_script(
-			'aba-admin-campaign',
-			'ABA_Admin',
-			array(
-				'ajax_nonce' => wp_create_nonce( 'aba_admin_nonce' ),
-				'plugin_url' => ABA_PLUGIN_URL,
-				'post_type'  => 'ai_campaign',
-				'i18n'       => array(
-					'select_campaign' => __( 'Select Campaign Type', 'auto-blogger-ai' ),
-					'rss_feed'        => __( 'RSS Feed', 'auto-blogger-ai' ),
-					'youtube'         => __( 'YouTube', 'auto-blogger-ai' ),
-					'keyword'         => __( 'Keyword', 'auto-blogger-ai' ),
-					'trends'          => __( 'Google Trends', 'auto-blogger-ai' ),
-				),
-			)
-		);
-	}
+    // If get_current_screen is available, more precise check
+    if ( $screen ) {
+      // screen->id may contain post type information
+      if ( in_array( $screen->id, $allowed_screen_ids, true ) || ( isset( $screen->post_type ) && 'ai_campaign' === $screen->post_type ) ) {
+        $enqueue = true;
+      }
+    }
+
+    // Fallback: check current URL for post_type=ai_campaign (for cases where get_current_screen is not callable)
+    if ( ! $enqueue ) {
+      $uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+      if ( false !== strpos( $uri, 'post_type=ai_campaign' ) || false !== strpos( $uri, 'page=aba_settings' ) || false !== strpos( $uri, '/edit.php?post_type=ai_campaign' ) ) {
+        $enqueue = true;
+      }
+    }
+
+    if ( ! $enqueue ) {
+      return;
+    }
+
+    // Enqueue styles and scripts
+    wp_enqueue_style( 'aba-admin-css', ABA_PLUGIN_URL . 'assets/css/admin.css', array(), self::VERSION );
+    wp_enqueue_script( 'aba-admin-campaign', ABA_PLUGIN_URL . 'assets/js/admin-campaign.js', array( 'jquery' ), self::VERSION, true );
+
+    // Localize required values (no PHP placeholders in JS file)
+    wp_localize_script(
+      'aba-admin-campaign',
+      'ABA_Admin',
+      array(
+        'ajax_nonce'     => wp_create_nonce( 'aba_admin_nonce' ),
+        'post_type'      => 'ai_campaign',
+        'admin_post_new' => admin_url( 'post-new.php' ),
+        'i18n'           => array(
+          'select_campaign' => __( 'Select Campaign Type', 'auto-blogger-ai' ),
+          'rss_feed'        => __( 'RSS Feed', 'auto-blogger-ai' ),
+          'youtube'         => __( 'YouTube', 'auto-blogger-ai' ),
+          'keyword'         => __( 'Keyword', 'auto-blogger-ai' ),
+          'trends'          => __( 'Google Trends', 'auto-blogger-ai' ),
+          'cancel'          => __( 'Cancel', 'auto-blogger-ai' ),
+        ),
+      )
+    );
+  }
 }
 
 // Initialize plugin.
